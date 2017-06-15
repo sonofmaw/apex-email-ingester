@@ -15,5 +15,12 @@
   "bugs": {
     "url": "https://github.com/sonofmaw/apex-email-ingester/issues"
   },
-  "homepage": "https://github.com/sonofmaw/apex-email-ingester#readme"
+  "homepage": "https://github.com/sonofmaw/apex-email-ingester#readme",
+  "dependencies": {
+    "escape-html": "^1.0.3",
+    "express": "^4.15.3",
+    "google-auth-library": "^0.10.0",
+    "googleapis": "^19.0.0",
+    "html2bbcode": "^1.2.5"
+  }
 }
