@@ -39,7 +39,7 @@ function recentMessages(auth, query, cb) {
             console.log('The API returned an error: ' + err);
             return;
         }
-        
+
         cb(resp.messages);
     });
 }
@@ -62,9 +62,9 @@ function getMessage(auth, id, cb) {
             message[h.name] = h.value;
         });
         message.Body = getText(resp);
-        
+
         cb(message);
-    }
+    });
 }
 
 module.exports = {
