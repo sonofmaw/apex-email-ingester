@@ -1,5 +1,5 @@
-var escape = require('escape-html');
-var google = require('googleapis');
+const escape = require('escape-html');
+const google = require('googleapis');
 
 function atob(str) {
     return new Buffer(str, 'base64').toString('binary');
@@ -10,11 +10,11 @@ function decode(string) {
 }
 
 function getText(response) {
-    var result = '';
-    var parts = [response.payload];
+    let result = '';
+    let parts = [response.payload];
 
     while (parts.length) {
-        var part = parts.shift();
+        let part = parts.shift();
         if (part.parts) {
             parts = parts.concat(part.parts);
         }
@@ -28,33 +28,33 @@ function getText(response) {
 }
 
 function recentMessages(auth, query, cb) {
-    var gmail = google.gmail('v1');
+    // @ts-ignore
+    const gmail = google.gmail('v1');
 
     gmail.users.messages.list({
         auth,
         userId: 'me',
         maxResults: 10
-    }, function (err, resp) {
+    }, (err, resp) => {
         if (err) {
-            console.log('The API returned an error: ' + err);
-            return;
+            return cb(err);
         }
 
-        cb(resp.messages);
+        cb(null, resp.messages);
     });
 }
 
 function getMessage(auth, id, cb) {
-    var gmail = google.gmail('v1');
+    // @ts-ignore
+    const gmail = google.gmail('v1');
 
     gmail.users.messages.get({
         auth,
         id,
         userId: 'me'
-    }, function (err, resp) {
+    }, (err, resp) => {
         if (err) {
-            console.log('The API returned an error: ' + err);
-            return;
+            return cb(err);
         }
 
         let message = {};
@@ -63,7 +63,7 @@ function getMessage(auth, id, cb) {
         });
         message.Body = getText(resp);
 
-        cb(message);
+        cb(null, message);
     });
 }
 

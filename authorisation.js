@@ -1,16 +1,15 @@
-var fs = require('fs');
-var readline = require('readline');
-var googleAuth = require('google-auth-library');
+const fs = require('fs');
+const readline = require('readline');
+const googleAuth = require('google-auth-library');
 
-var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
-var TOKEN_PATH = './gmail-token.json';
+const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
+const TOKEN_PATH = './gmail-token.json';
 
 function getAuthorization(cb) {
     // Load client secrets from a local file.
-    fs.readFile('client-secret.json', function processClientSecrets(err, content) {
+    fs.readFile('client-secret.json', 'utf-8', (err, content) => {
         if (err) {
-            console.log('Error loading client secret file: ' + err);
-            return;
+            return cb(err);
         }
         // Authorize a client with the loaded credentials, then call the
         // Gmail API.
@@ -23,14 +22,14 @@ function getAuthorization(cb) {
  * given callback function.
  */
 function authorize(credentials, callback) {
-    var clientSecret = credentials.installed.client_secret;
-    var clientId = credentials.installed.client_id;
-    var redirectUrl = credentials.installed.redirect_uris[0];
-    var auth = new googleAuth();
-    var oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
+    const clientSecret = credentials.installed.client_secret;
+    const clientId = credentials.installed.client_id;
+    const redirectUrl = credentials.installed.redirect_uris[0];
+    const auth = new googleAuth();
+    let oauth2Client = new auth.OAuth2(clientId, clientSecret, redirectUrl);
 
     // Check if we have previously stored a token.
-    fs.readFile(TOKEN_PATH, function (err, token) {
+    fs.readFile(TOKEN_PATH, 'utf-8', (err, token) => {
         if (err) {
             getNewToken(oauth2Client, callback);
         } else {
@@ -45,16 +44,16 @@ function authorize(credentials, callback) {
  * execute the given callback with the authorized OAuth2 client.
  */
 function getNewToken(oauth2Client, callback) {
-    var authUrl = oauth2Client.generateAuthUrl({
+    const authUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: SCOPES
     });
     console.log('Authorize this app by visiting this url: ', authUrl);
-    var rl = readline.createInterface({
+    let rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
     });
-    rl.question('Enter the code from that page here: ', function (code) {
+    rl.question('Enter the code from that page here: ', code => {
         rl.close();
         oauth2Client.getToken(code, function (err, token) {
             if (err) {
