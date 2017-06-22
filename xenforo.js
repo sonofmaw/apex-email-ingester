@@ -5,8 +5,6 @@ const API_KEY = process.env.XENFORO_API_KEY;
 const THREAD_ID = 3839;
     
 function postMessage(id, messageContent, callback) {
-    console.log("Posting message: ", messageContent.Subject);   
-
     request.get(xenForoUrl, {
         qs: {
             hash: API_KEY,
