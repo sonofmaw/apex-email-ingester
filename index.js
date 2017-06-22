@@ -24,7 +24,7 @@ function checkMessages(auth, state, callback) {
 
         function fetchAndPost(index) {
             if (index >= ids.length) {
-                callback();
+                return callback();
             }
             
             const id = ids[index];
