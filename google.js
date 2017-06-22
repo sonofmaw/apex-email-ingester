@@ -33,8 +33,7 @@ function recentMessages(auth, query, cb) {
 
     gmail.users.messages.list({
         auth,
-        userId: 'me',
-        maxResults: 10
+        userId: 'me'
     }, (err, resp) => {
         if (err) {
             return cb(err);
