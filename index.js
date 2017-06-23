@@ -2,14 +2,24 @@ const google = require('./google');
 const authorisation = require('./authorisation');
 const xenforo = require('./xenforo');
 const fs = require('fs');
+const cron = require('node-cron');
+const gutil = require('gutil');
 
 const STATE_PATH = './last-message.json';
 
 function reportError(err) {
     if (err) {
-        console.error(err);
+        gutil.error(err);
     }
 }
+
+const formatMessage = messageContent => (
+`From: ${messageContent.From}
+Subject: ${messageContent.Subject}
+Received: ${messageContent.Received}
+
+${messageContent.Body}
+`);
 
 function checkMessages(auth, state, callback) {
     google.recentMessages(auth, null, (err, messages) => {
@@ -34,24 +44,29 @@ function checkMessages(auth, state, callback) {
                     return reportError(err);
                 }
 
-                xenforo.postMessage(id, messageContent, err => {
-                    if (err) {
-                        return callback(err);
-                    }
+                if (!process.env.FAKE_XENFORO) {
+                    xenforo.postMessage(id, formatMessage(messageContent), err => {
+                        if (err) {
+                            return callback(err);
+                        }
 
-                    console.log("Posted message ", messageContent.Subject);                    
+                        gutil.log("Posted message ", messageContent.Subject);
                     
-                    writeState({
-                        lastMessageId: id
-                    });
+                        writeState({
+                            lastMessageId: id
+                        });
 
-                    fetchAndPost(index + 1);
-                });
+                        fetchAndPost(index + 1);
+                    });
+                } else {
+                    gutil.log("Would have posted message: ", formatMessage(messageContent));
+                    setTimeout(() => fetchAndPost(index + 1), (Math.random() * 3000) + 500);
+                }
             });
         }
 
         if (ids.length === 0) {
-            console.info("No new messages");
+            gutil.info("No new messages");
             return callback();
         }
 
@@ -63,18 +78,21 @@ function writeState(state) {
     fs.writeFileSync(STATE_PATH, JSON.stringify(state), 'utf-8');
 }
 
-authorisation.getAuthorization(auth => {
-    // Read the persisted last message
-    if (!fs.existsSync(STATE_PATH)) {
-        checkMessages(auth, {
-            lastMessageId: ""
-        }, reportError);
-    } else {
-        fs.readFile(STATE_PATH, 'utf-8', (err, state) => {
-            if (err) {
-                return reportError(err);
-            }
-            checkMessages(auth, JSON.parse(state), reportError);
-        });
-    }
-});
+
+cron.schedule('*/15 * * * *', () => {
+    authorisation.getAuthorization(auth => {
+        // Read the persisted last message
+        if (!fs.existsSync(STATE_PATH)) {
+            checkMessages(auth, {
+                lastMessageId: ""
+            }, reportError);
+        } else {
+            fs.readFile(STATE_PATH, 'utf-8', (err, state) => {
+                if (err) {
+                    return reportError(err);
+                }
+                checkMessages(auth, JSON.parse(state), reportError);
+            });
+        }
+    });
+}, true);    

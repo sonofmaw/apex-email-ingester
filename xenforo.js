@@ -2,16 +2,16 @@ const request = require('request');
 const xenForoUrl = "http://apexracinguk.com/forums/api.php";
 
 const API_KEY = process.env.XENFORO_API_KEY;
-const THREAD_ID = 3839;
+const THREAD_ID = 3841;
     
-function postMessage(id, messageContent, callback) {
+function postMessage(id, message, callback) {
     request.get(xenForoUrl, {
         qs: {
             hash: API_KEY,
             action: "createpost",
             thread_id: THREAD_ID,
-            grab_as: "Tim Mawson",
-            message: messageContent.Body,
+            grab_as: "ApexRacingTV",
+            message,
         }
     }, (err, res) => {
         if (err) {
