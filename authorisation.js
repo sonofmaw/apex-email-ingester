@@ -33,7 +33,7 @@ function authorize(credentials, callback) {
         if (err) {
             getNewToken(oauth2Client, callback);
         } else {
-            oauth2Client.credentials = JSON.parse(token);
+            oauth2Client.setCredentials(JSON.parse(token));
             callback(oauth2Client);
         }
     });
@@ -60,7 +60,7 @@ function getNewToken(oauth2Client, callback) {
                 console.log('Error while trying to retrieve access token', err);
                 return;
             }
-            oauth2Client.credentials = token;
+            oauth2Client.setCredentials(token);
             storeToken(token);
             callback(oauth2Client);
         });

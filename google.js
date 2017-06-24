@@ -22,6 +22,9 @@ function getText(response) {
             result = decode(part.body.data);
             break;
         }
+        if (part.mimeType === 'text/html') {
+            result = decode(part.body.data);
+        }
     }
 
     return result;
