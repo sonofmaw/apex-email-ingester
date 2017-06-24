@@ -21,7 +21,7 @@ let config = {
     threadId: '3841'
 }
 
-if (fs.existsSync(STATE_PATH)) {
+if (fs.existsSync(CONFIG_PATH)) {
     config = Object.assign(config, JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8')));
 }
 
