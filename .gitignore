@@ -1,2 +1,4 @@
 node_modules
-*.json
+client-secret.json
+gmail-token.json
+last-message.json
