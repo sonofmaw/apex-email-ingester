@@ -3,7 +3,6 @@ const authorisation = require('./authorisation');
 const xenforo = require('./xenforo');
 const fs = require('fs');
 const cron = require('node-cron');
-const gutil = require('gutil');
 const prettyCron = require('prettycron');
 
 const STATE_PATH = './last-message.json';
@@ -11,7 +10,7 @@ const CONFIG_PATH = './config.json';
 
 function reportError(err) {
     if (err) {
-        gutil.error(err);
+        console.error(err);
     }
 }
 
@@ -62,7 +61,7 @@ function checkMessages(auth, state, callback) {
                             return callback(err);
                         }
 
-                        gutil.log("Posted message ", messageContent.Subject);
+                        console.log("Posted message ", messageContent.Subject);
                     
                         writeState({
                             lastMessageId: id
@@ -71,14 +70,14 @@ function checkMessages(auth, state, callback) {
                         fetchAndPost(index + 1);
                     });
                 } else {
-                    gutil.log("Would have posted message: ", formatMessage(messageContent));
+                    console.log("Would have posted message: ", formatMessage(messageContent));
                     setTimeout(() => fetchAndPost(index + 1), (Math.random() * 3000) + 500);
                 }
             });
         }
 
         if (ids.length === 0) {
-            gutil.info("No new messages");
+            console.info("No new messages");
             return callback();
         }
 
@@ -90,7 +89,7 @@ function writeState(state) {
     fs.writeFileSync(STATE_PATH, JSON.stringify(state), 'utf-8');
 }
 
-gutil.log("First check", prettyCron.getNext(config.schedule));
+console.log("First check", prettyCron.getNext(config.schedule));
 
 cron.schedule(config.schedule, () => {
     const complete = err => {
@@ -99,7 +98,7 @@ cron.schedule(config.schedule, () => {
             cron.stop();
         }
 
-        gutil.log("Next check", prettyCron.getNext(config.schedule));
+        console.log("Next check", prettyCron.getNext(config.schedule));
     }
 
     authorisation.getAuthorization(auth => {
