@@ -33,6 +33,8 @@ ${messageContent.Body}
 `);
 
 function checkMessages(auth, state, callback) {
+    console.log("Checking messages");
+
     google.recentMessages(auth, null, (err, messages) => {
         if (err) {
             return reportError(err);
@@ -77,9 +79,11 @@ function checkMessages(auth, state, callback) {
         }
 
         if (ids.length === 0) {
-            console.info("No new messages");
+            console.log("No new messages");
             return callback();
         }
+
+        console.log(ids.length, "new messages");
 
         fetchAndPost(0);
     });
@@ -91,11 +95,11 @@ function writeState(state) {
 
 console.log("First check", prettyCron.getNext(config.schedule));
 
-cron.schedule(config.schedule, () => {
+let job = cron.schedule(config.schedule, () => {
     const complete = err => {
         if (err) {
             reportError(err);
-            cron.stop();
+            job.stop();
         }
 
         console.log("Next check", prettyCron.getNext(config.schedule));
