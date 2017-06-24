@@ -4,13 +4,25 @@ const xenforo = require('./xenforo');
 const fs = require('fs');
 const cron = require('node-cron');
 const gutil = require('gutil');
+const prettyCron = require('prettycron');
 
 const STATE_PATH = './last-message.json';
+const CONFIG_PATH = './config.json';
 
 function reportError(err) {
     if (err) {
         gutil.error(err);
     }
+}
+
+let config = {
+    schedule: '*/15 * * * *',
+    emailAs: 'ApexRacingTV',
+    threadId: '3841'
+}
+
+if (fs.existsSync(STATE_PATH)) {
+    config = Object.assign(config, JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8')));
 }
 
 const formatMessage = messageContent => (
@@ -78,21 +90,32 @@ function writeState(state) {
     fs.writeFileSync(STATE_PATH, JSON.stringify(state), 'utf-8');
 }
 
+gutil.log("First check", prettyCron.getNext(config.schedule));
 
-cron.schedule('*/15 * * * *', () => {
+cron.schedule(config.schedule, () => {
+    const complete = err => {
+        if (err) {
+            reportError(err);
+            cron.stop();
+        }
+
+        gutil.log("Next check", prettyCron.getNext(config.schedule));
+    }
+
     authorisation.getAuthorization(auth => {
-        // Read the persisted last message
+        // Read the persisted last message                          
         if (!fs.existsSync(STATE_PATH)) {
             checkMessages(auth, {
                 lastMessageId: ""
-            }, reportError);
+            }, complete);
         } else {
             fs.readFile(STATE_PATH, 'utf-8', (err, state) => {
                 if (err) {
                     return reportError(err);
                 }
-                checkMessages(auth, JSON.parse(state), reportError);
+
+                checkMessages(auth, JSON.parse(state), complete);
             });
         }
     });
-}, true);    
+}, true);
