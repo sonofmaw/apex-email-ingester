@@ -58,7 +58,7 @@ function checkMessages(auth, state, callback) {
                 }
 
                 if (!process.env.FAKE_XENFORO) {
-                    xenforo.postMessage(id, formatMessage(messageContent), err => {
+                    xenforo.postMessage(config, formatMessage(messageContent), err => {
                         if (err) {
                             return callback(err);
                         }
